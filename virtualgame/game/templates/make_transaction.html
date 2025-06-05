@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <h2 class="card-title mb-4 text-center">💸 Купить или продать актив</h2>
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    {{ form.asset.label_tag }}{{ form.asset }}
+                </div>
+                <div class="mb-3">
+                    {{ form.quantity.label_tag }}{{ form.quantity }}
+                </div>
+                <div class="form-check mb-3">
+                    {{ form.is_purchase }} {{ form.is_purchase.label_tag }}
+                </div>
+                <button type="submit" class="btn btn-success w-100">Подтвердить сделку</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="text-center mt-3">
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+            ← Назад к дашборду
+        </a>
+    </div>
+</div>
+{% endblock %}

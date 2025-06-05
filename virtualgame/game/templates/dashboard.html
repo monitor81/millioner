@@ -5,6 +5,8 @@
         <h4 class="display-5 fw-bold text-primary">Добро пожаловать, {{ user.username }}!</h4>
     </div>
 
+    <a href="{% url 'make_transaction' %}" class="btn btn-success mb-3">Совершить сделку</a>
+
     <div class="row g-4">
         <!-- Accounts -->
         <div class="col-md-6">

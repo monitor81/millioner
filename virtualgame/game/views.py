@@ -87,3 +87,31 @@ def register(request):
 def logout_view(request):
     logout(request)
     return redirect('login')  # или куда хочешь перенаправлять
+
+from django.shortcuts import render, redirect
+from .forms import TransactionForm
+from .models import Asset, Transaction, Portfolio
+
+@login_required
+def make_transaction(request):
+    if request.method == 'POST':
+        form = TransactionForm(request.POST)
+        if form.is_valid():
+            transaction = form.save(commit=False)
+            transaction.user = request.user
+            asset = transaction.asset
+            transaction.price_at_transaction = asset.current_price  # фиксируем цену
+            transaction.save()
+
+            # обновим портфель
+            portfolio, created = Portfolio.objects.get_or_create(user=request.user, asset=asset)
+            if transaction.is_purchase:
+                portfolio.quantity += transaction.quantity
+            else:
+                portfolio.quantity -= transaction.quantity  # тут можно добавить проверку
+            portfolio.save()
+
+            return redirect('dashboard')  # или куда нужно
+    else:
+        form = TransactionForm()
+    return render(request, 'make_transaction.html', {'form': form})
