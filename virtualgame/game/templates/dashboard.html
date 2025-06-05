@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="text-center mb-5">
+        <h4 class="display-5 fw-bold text-primary">Добро пожаловать, {{ user.username }}!</h4>
+    </div>
+
+    <div class="row g-4">
+        <!-- Accounts -->
+        <div class="col-md-6">
+            <div class="card shadow-sm border-success">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">💰 Ваш счет</h4>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for account in accounts %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ account.currency.code }}
+                            <span class="badge bg-success rounded-pill">{{ account.balance }}</span>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">Нет доступных счетов.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Portfolio -->
+        <div class="col-md-6">
+            <div class="card shadow-sm border-info">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">📊 Портфель</h4>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for p in portfolio %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ p.asset.name }}
+                            <span class="badge bg-info rounded-pill">{{ p.quantity }}</span>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">Портфель пуст.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Transactions -->
+        <div class="col-12">
+            <div class="card shadow-sm border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">🔄 История транзакций</h4>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for t in transactions %}
+                        <li class="list-group-item">
+                            <strong>{{ t.timestamp|date:"d.m.Y H:i" }}</strong> —
+                            {{ t.asset.name }} —
+                            {{ t.quantity }} @ {{ t.price_at_transaction }}
+                            <span class="badge {% if t.is_purchase %}bg-success{% else %}bg-danger{% endif %}">
+                                {% if t.is_purchase %} Покупка {% else %} Продажа {% endif %}
+                            </span>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">Нет транзакций.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="col-12">
+            <div class="card shadow-sm border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">🏆 Список миллионеров</h4>
+                </div>
+                <ol class="list-group list-group-numbered list-group-flush">
+                    {% for item in leaderboard %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ item.user__username }}
+                            <span class="badge bg-primary rounded-pill">{{ item.total|floatformat:2 }}</span>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">Нет данных по рейтингу.</li>
+                    {% endfor %}
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-12" style="margin-top: 5%;">
+<div class="card shadow mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">📈 Динамика портфеля во времени</h5>
+    </div>
+    <div class="card-body">
+        <canvas id="portfolioChart" height="100"></canvas>
+    </div>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('portfolioChart').getContext('2d');
+    const portfolioChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ portfolio_dates|safe }},
+            datasets: [{
+                label: 'Стоимость портфеля',
+                data: {{ portfolio_values|safe }},
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 3,
+                borderWidth: 2
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Стоимость, $' }
+                },
+                x: {
+                    title: { display: true, text: 'Дата' }
+                }
+            }
+        }
+    });
+</script>
+
+
+
+{% endblock %}
